@@ -1,0 +1,1 @@
+# covid19-i18n-helper-niigata
