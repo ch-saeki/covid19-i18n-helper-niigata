@@ -10,7 +10,6 @@ import glob
 import pprint
 import pickle
 from collections import OrderedDict
-from __future__ import print_function
 
 def i18n_read_json(json_path):
     '''　i18njsonを順序保持したまま読込。 
@@ -24,14 +23,24 @@ def i18n_get_gs(google_spread_sheet_url):
     return pd.read_csv(google_spread_sheet_url)
 
 def i18n_get_gs_words(json_fname, gs):
+    ''' 翻訳spread sheetから対象言語の文言リストを取得。
+    '''
     gscolumns = gs.columns.values.tolist()
     if 'ja.json' in json_fname:
         gs_words = gs[gscolumns[0]].values.tolist()
         gs_words.extend(gs[gscolumns[1]].values.tolist()) 
+    # elif 'ja_Hira.json' in json_fname:
+    #     gs_words = gs[gscolumns[3]].values.tolist()
     elif 'en.json' in json_fname:
         gs_words = gs[gscolumns[3]].values.tolist()
-    elif 'en.json' in json_fname:
-        gs_words = gs[gscolumns[3]].values.tolist()
+    # elif 'ko.json' in json_fname:
+    #     gs_words = gs[gscolumns[3]].values.tolist()
+    elif 'zh_CN.json' in json_fname:
+        gs_words = gs[gscolumns[4]].values.tolist()
+    elif 'zh_TW.json' in json_fname:
+        gs_words = gs[gscolumns[5]].values.tolist()
+    elif 'vi.json' in json_fname:
+        gs_words = gs[gscolumns[6]].values.tolist()        
     return gs_words
 
 def i18n_translated_check(source_json, target_json):
@@ -81,15 +90,32 @@ def i18n_json_words_check(resource_files):
         i18n_translated_check('./locales/ja.json', resource)
 
 def i18n_diff_json_and_gs(google_spread_sheet_url, json_files):
-    """ ローカルのjson,google_spread_sheetのリソース差分を表示する。 
+    """ ローカルのjson,google_spread_sheetのリソース差分(文言有無)を表示する。 
     """
     gs = i18n_get_gs(google_spread_sheet_url)
     for resource in json_files:
         i18n_find_word_from_json(gs, resource)
         i18n_find_word_from_gs(resource, gs)
 
-def i18n_unused_check(vue_root, json_files):
-    pass
+def i18n_unused_check(vue_root, json_file):
+    """ 指定ディレクトリ配下のvueソースから、
+        使用されていない文言をリストアップ。
+    """
+    abspath = os.path.abspath(vue_root)
+    vues = glob.glob(abspath+'/**/*.vue', recursive=True)
+    
+    target_words = i18n_read_json(json_file)
+    unused_list = list(target_words.keys())
+    for vue in vues:
+        ld = open(vue, encoding='utf-8')
+        lines = ld.readlines()
+        ld.close()        
+        for word in unused_list:            
+            for line in lines:
+                if line.find(word) >= 0:
+                    unused_list.pop(unused_list.index(word))
+                    break        
+    print(unused_list)
 
 def i18n_create_json():
     pass
@@ -104,11 +130,13 @@ def main():
     resource_files = glob.glob('./locales/*.json')
     
     # ローカルリソース一貫性チェック
-    i18n_json_words_check(resource_files)
+    #i18n_json_words_check(resource_files)
+    
     # ローカルリソースとgoogle spread sheet差分チェック
-    i18n_diff_json_and_gs(sheet_url, resource_files)
+    #i18n_diff_json_and_gs(sheet_url, resource_files)
+    
     # ローカルのvueソース - json i18nリソースを比較、利用されていないリソース有無のチェック
-    # i18n_unused_check(vue_root, resource_files)
+    i18n_unused_check('/Users/saeki/dev/covid19', 'locales/ja.json')
 
 if __name__ =='__main__':
     main()
