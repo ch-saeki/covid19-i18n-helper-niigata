@@ -31,18 +31,25 @@ def i18n_get_gs(google_spread_sheet_url):
     '''    
     return pd.read_csv(google_spread_sheet_url)
 
+def i18n_get_gs_org_words(gs):
+    ''' 翻訳spread sheetからオリジナル文言リストを取得。
+        (ひとまず新潟県版翻訳を優先してkeyにする)
+    '''
+    gscolumns = gs.columns.values.tolist()
+    org_words = gs[gscolumns[GSCOL_ORG]].values.tolist()
+    niigata_words = gs[gscolumns[GSCOL_JA]].values.tolist()
+    for i in range(0, len(org_words)):
+        if niigata_words[i] == niigata_words[i]:
+            org_words[i] = niigata_words[i]
+    org_words.pop(0)
+    return org_words
+
 def i18n_get_gs_words(json_fname, gs):
     ''' 翻訳spread sheetから対象言語の文言リストを取得。
     '''
     gscolumns = gs.columns.values.tolist()
-    gs_original_words = gs[gscolumns[GSCOL_ORG]].values.tolist()
     if 'ja.json' in json_fname:
         gs_words = gs[gscolumns[GSCOL_JA]].values.tolist()
-        for i in range(0, len(gs_words)):
-             if gs_words[i] != gs_words[i]:
-                gs_words[i] = gs_original_words[i]
-    # elif 'ja_Hira.json' in json_fname:
-    #     gs_words = gs[gscolumns[3]].values.tolist()
     elif 'en.json' in json_fname:
         gs_words = gs[gscolumns[GSCOL_EN]].values.tolist()
     # elif 'ko.json' in json_fname:
@@ -53,6 +60,7 @@ def i18n_get_gs_words(json_fname, gs):
         gs_words = gs[gscolumns[GSCOL_ZH_TW]].values.tolist()
     elif 'vi.json' in json_fname:
         gs_words = gs[gscolumns[GSCOL_VI]].values.tolist()
+    gs_words.pop(0)
     return gs_words
 
 def i18n_translated_check(source_json, target_json):
@@ -78,6 +86,8 @@ def i18n_find_word_from_json(gs, json_path):
     json_fname = os.path.basename(json_path)    
     gs_words = i18n_get_gs_words(json_fname, gs)
     for gw in gs_words:
+        if gw != gw:
+            continue
         if gw not in json_words:
             """ TODO spread sheet側文章には「,」がない？"""
             print(f"\"{gw}\" not found in {json_fname}.")
@@ -141,26 +151,31 @@ def i18n_unused_check(vue_root, json_file):
     print(unused_list)
 
 def i18n_create_json(dst_json_path, base_words, gs):
+    ''' google spread sheetから対象言語のi18n jsonを出力。
+    '''
     target_words = i18n_get_gs_words(dst_json_path, gs)
     od = OrderedDict()
     for i, word in enumerate(base_words):
-        ''' nan chrck. '''
-        if target_words[i] == target_words[i]:            
-            ''' multi trans. '''
-            if word not in od:
-                od[word] = target_words[i]
-            else:
-                if type(od[word]) == list:
-                    od[word].append(target_words[i])
-                else:                    
-                    wl = [od[word], target_words[i]]
-                    od[word] = wl
+        if word != word:
+            continue        
+        if target_words[i] != target_words[i]:
+            if 'ja.json' in dst_json_path:
+                od[word] = word
+            continue
+        ''' multi trans. '''
+        if word not in od:
+            od[word] = target_words[i]
         else:
-            od[word] = ''
+            if type(od[word]) == dict:
+                if od[word].get(target_words[i-1]) is None:
+                    od[word][target_words[i]] = target_words[i+1]
+            else:
+                wl = {target_words[i-1]: target_words[i]}
+                od[word] = wl
 
     ''' output json''' 
-    with open(dst_json_path, 'w') as f:
-        json.dump(od, f, indent=4, ensure_ascii=False)
+    with open(dst_json_path, 'w', encoding='utf-8') as f:
+        json.dump(od, f, indent=2, ensure_ascii=False)
 
 def i18n_create_json_from_gs(google_spread_sheet_url, dst_dir):
     ''' google spread sheetから各言語向けi18n jsonを出力。 
@@ -168,7 +183,7 @@ def i18n_create_json_from_gs(google_spread_sheet_url, dst_dir):
     '''
     dst_jsons = ['ja.json', 'en.json', 'zh_CN.json', 'zh_TW.json', 'vi.json']
     gs = i18n_get_gs(google_spread_sheet_url)
-    base_words = i18n_get_gs_words("ja.json", gs)
+    base_words = i18n_get_gs_org_words(gs)
     for dst_json in dst_jsons:
         dst_json = os.path.join(dst_dir, dst_json)
         i18n_create_json(dst_json, base_words, gs)
@@ -180,7 +195,7 @@ def main():
     sheet_url = "https://docs.google.com/spreadsheets/d/1hcU7fT2peAlKNH5Dcp9xufuXH4vf5FGsRKxcF9WC9zc/export?format=csv&gid=17066585"
     # upload_test_url = "https://docs.google.com/spreadsheets/d/14283nuNCBeSNe4M6HSdar_9oVug2p15mkCNLwRrb4JQ/edit#gid=0"
     # upload_test_sheet_id = "14283nuNCBeSNe4M6HSdar_9oVug2p15mkCNLwRrb4JQ"
-    resource_files = glob.glob('./locales/*.json')
+    resource_files = glob.glob('./out_locales/ja.json')
     
     # ローカルリソース一貫性チェック
     # i18n_json_words_check(resource_files)
