@@ -202,10 +202,10 @@
   "濃厚接触": "in close contact",
   "流行地域への渡航・居住歴がある方": "aaaaaaaaaaaaaaaaaaaaa",
   "{you} か {closeContact}をした方": "aaaaaaaaaaaaaaaaaaaaa",
-  "0": {
-    "travel history from {area}": "COVID-19 prevalent area",
-    "been {inCloseContact} with returnees": "in close contact"
-  },
+  "travel history from {area}": "travel history from {area}",
+  "COVID-19 prevalent area": "COVID-19 prevalent area",
+  "been {inCloseContact} with returnees": "been {inCloseContact} with returnees",
+  "in close contact": "in close contact",
   "ご本人": "aaaaaaaaaaaaaaaaaaaaa",
   "発熱": "Fever",
   "または": "or",

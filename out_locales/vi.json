@@ -19,9 +19,7 @@
   "期間: {duration}": "aaaaaaaaaaaaaaaaaaaaa: {duration}",
   "{duration}の利用者数との相対値: {percentage}": "{duration}aaaaaaaaaaaaaaaaaaaaa",
   "人": "aaaaaaaaaaaaaaaaaaaaa",
-  "件": {
-    "aaaaaaaaaaaaaaaaaaaaa": "aaaaaaaaaaaaaaaaaaaaa"
-  },
+  "件": "aaaaaaaaaaaaaaaaaaaaa",
   "公表日": "aaaaaaaaaaaaaaaaaaaaa",
   "居住地": "aaaaaaaaaaaaaaaaaaaaa",
   "年代": "aaaaaaaaaaaaaaaaaaaaa",
@@ -201,9 +199,10 @@
   "濃厚接触": "aaaaaaaaaaaaaaaaaaaaa",
   "流行地域への渡航・居住歴がある方": "aaaaaaaaaaaaaaaaaaaaa",
   "{you} か {closeContact}をした方": "{you} か {closeContact}aaaaaaaaaaaaaaaaaaaaa",
-  "0": {
-    "aaaaaaaaaaaaaaaaaaaaa": "aaaaaaaaaaaaaaaaaaaaa"
-  },
+  "travel history from {area}": "aaaaaaaaaaaaaaaaaaaaa",
+  "COVID-19 prevalent area": "aaaaaaaaaaaaaaaaaaaaa",
+  "been {inCloseContact} with returnees": "aaaaaaaaaaaaaaaaaaaaa",
+  "in close contact": "aaaaaaaaaaaaaaaaaaaaa",
   "ご本人": "aaaaaaaaaaaaaaaaaaaaa",
   "発熱": "aaaaaaaaaaaaaaaaaaaaa",
   "または": "aaaaaaaaaaaaaaaaaaaaa",

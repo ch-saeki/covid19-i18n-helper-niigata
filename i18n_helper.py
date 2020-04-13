@@ -187,8 +187,9 @@ def i18n_create_json(dst_json_path, base_words, gs):
                 if od[word].get(target_words[i-1]) is None:
                     od[word][target_words[i]] = target_words[i+1]
             else:
-                wl = {target_words[i-1]: target_words[i]}
-                od[word] = wl
+                if od[word] != target_words[i]:
+                    wl = {target_words[i-1]: target_words[i]}
+                    od[word] = wl
 
     ''' output json'''
     with open(dst_json_path, 'w', encoding='utf-8') as f:
