@@ -37,7 +37,8 @@ def i18n_get_gs(google_spread_sheet_url):
 
 def i18n_get_gs_org_words(gs):
     ''' 翻訳spread sheetからオリジナル文言リストを取得。
-        (ひとまず、新潟県版翻訳があれば優先してkeyにする)
+        新潟県版翻訳があれば優先してkeyにする。
+
     '''
     gscolumns = gs.columns.values.tolist()
     org_words = gs[gscolumns[GSCOL_ORG]].values.tolist()
@@ -45,6 +46,7 @@ def i18n_get_gs_org_words(gs):
     for i in range(0, len(org_words)):
         if niigata_words[i] == niigata_words[i]:
             org_words[i] = niigata_words[i]
+            org_words[i] = org_words[i].replace('%', '')
     org_words.pop(0)
     return org_words
 
@@ -157,8 +159,9 @@ def i18n_unused_check(vue_root, json_file):
         lines = ld.readlines()
         ld.close()
         for word in unused_list:
+            search_word = '$t(\'' + word +  '\')'
             for line in lines:
-                if line.find(word) >= 0:
+                if line.find(search_word) >= 0:
                     unused_list.pop(unused_list.index(word))
                     break
     print(unused_list)
