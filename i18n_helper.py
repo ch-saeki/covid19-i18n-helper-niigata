@@ -20,6 +20,7 @@ GSCOL_ZH_TW = 5
 GSCOL_VI = 6
 GSCOL_NE = 7
 GSCOL_RU = 8
+GSCOL_JA_HIRA = 9
 
 
 def i18n_read_json(json_path):
@@ -67,6 +68,8 @@ def i18n_get_gs_words(json_fname, gs):
         gs_words = gs[gscolumns[GSCOL_ZH_TW]].values.tolist()
     elif 'vi.json' in json_fname:
         gs_words = gs[gscolumns[GSCOL_VI]].values.tolist()
+    elif 'ja_hira.json' in json_fname:
+        gs_words = gs[gscolumns[GSCOL_JA_HIRA]].values.tolist()        
     gs_words.pop(0)
     return gs_words
 
@@ -159,18 +162,20 @@ def i18n_unused_check(vue_root, json_file):
         lines = ld.readlines()
         ld.close()
         for word in unused_list:
-            search_word = '$t(\'' + word +  '\')'
+            # search_word = '$t(\'' + word +  '\')'
             for line in lines:
-                if line.find(search_word) >= 0:
+                if line.find(word) >= 0:
                     unused_list.pop(unused_list.index(word))
                     break
-    print(unused_list)
+    for word in unused_list:
+        print(word)
 
 
 def i18n_create_json(dst_json_path, base_words, gs):
     ''' google spread sheetから対象言語のi18n jsonを出力。
     '''
     target_words = i18n_get_gs_words(dst_json_path, gs)
+    en_words = i18n_get_gs_words('en.json', gs)
     od = OrderedDict()
     for i, word in enumerate(base_words):
         if word != word:
@@ -184,11 +189,11 @@ def i18n_create_json(dst_json_path, base_words, gs):
             od[word] = target_words[i]
         else:
             if type(od[word]) == dict:
-                if od[word].get(target_words[i-1]) is None:
-                    od[word][target_words[i]] = target_words[i+1]
+                if od[word].get(en_words[i-1]) is None:
+                    od[word][en_words[i]] = en_words[i+1]
             else:
-                if od[word] != target_words[i]:
-                    wl = {target_words[i-1]: target_words[i]}
+                if od[word] != en_words[i]:
+                    wl = {en_words[i-1]: en_words[i]}
                     od[word] = wl
 
     ''' output json'''
@@ -200,7 +205,7 @@ def i18n_create_json_from_gs(google_spread_sheet_url, dst_dir):
     ''' google spread sheetから各言語向けi18n jsonを出力。 
         json出力後に、vueで使用されていないリソースのcheckも行う。
     '''
-    dst_jsons = ['ja.json', 'en.json', 'zh_CN.json', 'zh_TW.json', 'vi.json']
+    dst_jsons = ['ja.json', 'en.json', 'zh_CN.json', 'zh_TW.json', 'vi.json', 'ja_hira.json']
     gs = i18n_get_gs(google_spread_sheet_url)
     base_words = i18n_get_gs_org_words(gs)
     for dst_json in dst_jsons:
