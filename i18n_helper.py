@@ -126,16 +126,17 @@ def i18n_find_word_from_gs(json_path, gs):
     return not_found_lsit
 
 
-def i18n_json_words_check(resource_files):
-    """ localesディレクトリ配下のi18njsonについて、
+def i18n_json_words_check(resource_dir):
+    """ 指定ディレクトリ配下のi18njsonについて、
         各言語で同じリソースがリストされているかチェックする。
     """
     not_translation_lists = []
+    resource_files = glob.glob(resource_dir + '/*.json')
     for resource in resource_files:
         if 'ja.json' in resource:
             continue
         not_translation_lists.append(
-            i18n_translated_check('./locales/ja.json', resource))
+            i18n_translated_check(os.path.join(resource_dir, './ja.json'), resource))
     return not_translation_lists
 
 
@@ -162,7 +163,6 @@ def i18n_unused_check(vue_root, json_file):
         lines = ld.readlines()
         ld.close()
         for word in unused_list:
-            # search_word = '$t(\'' + word +  '\')'
             for line in lines:
                 if line.find(word) >= 0:
                     unused_list.pop(unused_list.index(word))
@@ -220,21 +220,31 @@ def main():
     sheet_url = "https://docs.google.com/spreadsheets/d/1hcU7fT2peAlKNH5Dcp9xufuXH4vf5FGsRKxcF9WC9zc/export?format=csv&gid=17066585"
     # upload_test_url = "https://docs.google.com/spreadsheets/d/14283nuNCBeSNe4M6HSdar_9oVug2p15mkCNLwRrb4JQ/edit#gid=0"
     # upload_test_sheet_id = "14283nuNCBeSNe4M6HSdar_9oVug2p15mkCNLwRrb4JQ"
-    resource_files = glob.glob('./out_locales/ja.json')
+        
+    args = sys.argv
 
-    # ローカルリソース一貫性チェック
-    # i18n_json_words_check(resource_files)
-
-    # ローカルのvueソース - json i18nリソースを比較、利用されていないリソース有無のチェック
-    # i18n_unused_check('/Users/saeki/dev/covid19', 'locales/ja.json')
-
-    # ローカルリソースとgoogle spread sheet差分チェック
-    # i18n_diff_json_and_gs(sheet_url, resource_files)
-
-    # google spread sheet から各言語リソースjson出力
-    dst_dir = './out_locales'
-    i18n_create_json_from_gs(sheet_url, dst_dir)
-
+    if args[1] == 'createjson':
+        # google spread sheetからi18n json の生成
+        if len(args) > 2:
+            dst_dir = args[2]
+        else:
+            dst_dir = './out_locales'
+        i18n_create_json_from_gs(sheet_url, dst_dir)
+    elif args[1] == 'diffjson':
+        # ローカルリソースとgoogle spread sheetの差分チェック
+        if len(args) > 2:
+            resource_dir = args[2]      
+            resource = glob.glob(os.path.join(resource_dir, 'ja.json'))
+            i18n_diff_json_and_gs(sheet_url, resource)
+    elif args[1] == 'checkjson':
+        # ローカルリソース一貫性チェック
+        if len(args) > 2:
+            resource_dir = args[2]
+            i18n_json_words_check(resource_dir)
+    elif args[1] == 'unusedlist':
+        # ローカルのvueソース - json i18nリソースを比較、利用されていないリソース有無のチェック
+        vue_project_dir = args[2]
+        i18n_unused_check(vue_project_dir, 'locales/ja.json')
 
 if __name__ == '__main__':
     main()
