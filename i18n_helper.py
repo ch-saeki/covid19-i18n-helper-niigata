@@ -243,8 +243,10 @@ def main():
             i18n_json_words_check(resource_dir)
     elif args[1] == 'unusedlist':
         # ローカルのvueソース - json i18nリソースを比較、利用されていないリソース有無のチェック
-        vue_project_dir = args[2]
-        i18n_unused_check(vue_project_dir, 'locales/ja.json')
+        if len(args) > 3:
+            vue_project_dir = args[2]
+            resource_dir = args[3]
+            i18n_unused_check(vue_project_dir, os.path.join(resource_dir, '/ja.json'))
 
 if __name__ == '__main__':
     main()
