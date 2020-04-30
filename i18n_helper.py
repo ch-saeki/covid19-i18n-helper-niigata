@@ -92,7 +92,7 @@ def i18n_translated_check(source_json, target_json):
 def i18n_find_word_from_json(gs, json_path):
     """　spread sheetにあってjsonにない該当言語の文章を探す。
     """
-    print(f'Find google spread sheet words from {json_path}... ')
+    print(f'Finding google spread sheet words from {json_path}... ')
     not_found_lsit = []
 
     json_words = i18n_read_json(json_path)
@@ -101,8 +101,8 @@ def i18n_find_word_from_json(gs, json_path):
     for gw in gs_words:
         if gw != gw:
             continue
+        gw = gw.replace('%', '')
         if gw not in json_words:
-            """ TODO spread sheet側文章には「,」がない？"""
             print(f"\"{gw}\" not found in {json_fname}.")
             not_found_lsit.append(gw)
     return not_found_lsit
@@ -112,17 +112,23 @@ def i18n_find_word_from_gs(json_path, gs):
     """ jsonにあってspread sheetにない文章を探す。    
         新潟県版翻訳が存在しないケースもあるので、ja.jsonの場合は2列から検索。 
     """
-    print(f'Find {json_path} words from spread sheet... ')
+    print(f'Finding {json_path} words from google spread sheet... ')
     not_found_lsit = []
 
     json_words = i18n_read_json(json_path).items()
     json_fname = os.path.basename(json_path)
     gs_words = i18n_get_gs_words(json_fname, gs)
     for jw in json_words:
-        if jw[1] not in gs_words:
-            """ TODO spread sheet側文章には「,」がない？"""
-            print(f"{json_fname} \"{jw[1]}\" not found in spread sheet.")
-            not_found_lsit.append(jw[1])
+        # 複数翻訳対応
+        if type(jw[1]) == OrderedDict:
+            if jw[0] not in gs_words:
+                print(f"{json_fname} \"{jw[0]}\" not found in spread sheet.")
+                not_found_lsit.append(jw[0])
+        else:
+            if jw[1] not in gs_words:
+                print(f"{json_fname} \"{jw[1]}\" not found in spread sheet.")
+                not_found_lsit.append(jw[1])
+    
     return not_found_lsit
 
 
